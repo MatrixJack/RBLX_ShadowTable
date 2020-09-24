@@ -107,9 +107,15 @@ end
 --<<-------------------------------------------------------->>--
 
 function shadowTable:__index(index)
-	local content = rawget(self, "content")
-	
-	return content[index]
+	local apiCallback = rawget(self, index)
+
+	if apiCallback then
+		return apiCallback
+	else
+		local content = rawget(self, "content")
+		
+		return content[index]
+	end
 end
 
 function shadowTable:__newindex(index, value)
@@ -179,6 +185,10 @@ return {
 		
 		tableManipulation:replicateElements(self__content, self__raw.content, shadowTable.__index, self__raw)
 		tableManipulation:removeElements(self__content)
+
+		function self__raw:GetElementChangedSignal(elementName)
+			return self__raw[elementName].Changed.Event
+		end
 		
 		setmetatable(self__content, {mode = "k"})
 		return setmetatable(self__raw, shadowTable)
